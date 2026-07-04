@@ -38,3 +38,6 @@ mapa = {
     ".pbix": "PowerBI",   # nova linha
 }
 ```
+## Autor
+
+Francisco de Assis · [GitHub](https://github.com/FranciscoAssislsj)

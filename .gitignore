@@ -1,0 +1,6 @@
+# pasta de teste gerada pelo script, nao precisa ir pro Git
+pasta_baguncada/
+
+# caches do Python
+__pycache__/
+*.pyc

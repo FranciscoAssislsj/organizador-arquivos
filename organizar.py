@@ -1,5 +1,7 @@
 from pathlib import Path
 import shutil
+from rich.console import Console
+from rich.table import Table
 
 
 
@@ -20,6 +22,10 @@ def organizar_pasta(pasta):
     movidos = 0
     ignorados = 0
 
+    # Lista que ACUMULA uma linha por arquivo processado.
+    # Cada item e uma tupla de 3 pedacos: (nome, destino, status)
+    linhas = []
+
     # list(...) tira uma "foto" dos arquivos ANTES de comecar a mexer,
     # pra nao se confundir com as subpastas novas que vamos criando
     for arquivo in list(pasta.iterdir()):
@@ -31,9 +37,9 @@ def organizar_pasta(pasta):
         extensao = arquivo.suffix.lower()   # ex: ".pdf"
         destino = mapa.get(extensao)        # None se a extensao nao estiver no mapa
 
-        # Caso PREVISIVEL: extensao fora do mapa -> decido ignorar (if/.get)
+        # Caso PREVISIVEL: extensao fora do mapa -> guardo como ignorado
         if destino is None:
-            print(f"{arquivo.name}  ->  (tipo desconhecido, ignorado)")
+            linhas.append((arquivo.name, "-", "[yellow]ignorado (tipo desconhecido)[/yellow]"))
             ignorados += 1
             continue
 
@@ -45,14 +51,27 @@ def organizar_pasta(pasta):
         # sem permissao...) -> try/except protege pra nao quebrar tudo
         try:
             shutil.move(arquivo, pasta_destino / arquivo.name)
-            print(f"{arquivo.name}  ->  {destino}/")
+            linhas.append((arquivo.name, f"{destino}/", "[green]movido[/green]"))
             movidos += 1
         except Exception as erro:
-            print(f"FALHOU ao mover {arquivo.name}: {erro}")
+            linhas.append((arquivo.name, "-", f"[red]falhou: {erro}[/red]"))
             ignorados += 1
 
-    # Resumo final
-    print(f"\nPronto! {movidos} movidos, {ignorados} ignorados.")
+    # === EXIBICAO: agora que ja processei tudo, monto a tabela UMA vez ===
+    console = Console()                          # o "printer" turbinado do rich
+    tabela = Table(title="Arquivos organizados")
+    tabela.add_column("Arquivo")                 # desenha o cabecalho das 3 colunas
+    tabela.add_column("Destino")
+    tabela.add_column("Status")
+
+    # desempacota cada tupla acumulada e vira uma linha da tabela
+    for nome, destino, status in linhas:
+        tabela.add_row(nome, destino, status)
+
+    console.print(tabela)
+    console.print(f"\n[bold]Pronto![/bold] {movidos} movidos, {ignorados} ignorados.")
+
     return movidos, ignorados
+
 
 organizar_pasta("pasta_baguncada")

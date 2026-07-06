@@ -74,4 +74,7 @@ def organizar_pasta(pasta):
     return movidos, ignorados
 
 
-organizar_pasta("pasta_baguncada")
+# So roda a organizacao automatica se ESTE arquivo foi executado direto
+# (python organizar.py). Se ele for so importado, fica quieto.
+if __name__ == "__main__":
+    organizar_pasta("pasta_baguncada")
